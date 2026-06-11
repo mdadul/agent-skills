@@ -92,6 +92,29 @@ The installer detects which agent tools you have and writes the skills to the ri
 npx skills@latest add mdadul/agent-skills/clean-code
 ```
 
+By default the installer stops at the top-level skills. To also pull in the 22 nested [design-pattern](skills/design-pattern/) skills, search the full tree:
+
+```sh
+# Include the nested design-pattern/** skills
+npx skills@latest add mdadul/agent-skills --full-depth
+```
+
+### Installing the subagent
+
+The [`skills`](https://skills.sh) CLI installs **skills only** — the [refactoring-expert](agents/refactoring-expert.md) subagent is a separate artifact you install by hand. For Claude Code, drop it in an agents directory (`~/.claude/agents/` for user-wide, or `.claude/agents/` in a project):
+
+```sh
+git clone https://github.com/mdadul/agent-skills.git
+
+# the subagent itself
+cp agent-skills/agents/refactoring-expert.md ~/.claude/agents/
+
+# the skills it depends on — it reads code-smells and refactoring at runtime
+npx skills@latest add mdadul/agent-skills -s code-smells,refactoring
+```
+
+> The `refactoring-expert` agent grounds every diagnosis in the `code-smells` and `refactoring` skills, so install those alongside it (or run it from inside this repo, where it can read them directly).
+
 ### Manual install
 
 Skills are plain Markdown with YAML frontmatter, so you can also install them by hand.
