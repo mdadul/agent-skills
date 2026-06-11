@@ -76,13 +76,40 @@ description: Apply Clean Code principles … Use when the user asks for clean co
 …
 ```
 
+## Installation
+
+The fastest way to install is with [`skills`](https://skills.sh), which works across 17+ agent tools (Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot, and more):
+
+```sh
+# Install all skills from this repo
+npx skills@latest add mdadul/agent-skills
+```
+
+The installer detects which agent tools you have and writes the skills to the right place for each — as universal files or symlinks. Run it from inside the project (or directory) where you want the skills available.
+
+```sh
+# Install a single skill
+npx skills@latest add mdadul/agent-skills/clean-code
+```
+
+### Manual install
+
+Skills are plain Markdown with YAML frontmatter, so you can also install them by hand.
+
+**Claude Code** — copy (or symlink) a skill directory under your skills path: `~/.claude/skills/` for user-wide, or `.claude/skills/` in a project. The agent discovers it automatically. Invoke explicitly with `/<skill-name>`, or let it trigger when a task matches the description.
+
+```sh
+git clone https://github.com/mdadul/agent-skills.git
+cp -r agent-skills/skills/clean-code ~/.claude/skills/
+```
+
+**Other tools** — point your tool at the `skills/` directory or copy individual skill folders; the format is portable across any skill-aware agent platform.
+
 ## Usage
 
-### Claude Code
-Place a skill directory under your skills path (e.g. `~/.claude/skills/` for user-wide, or `.claude/skills/` in a project) and the agent will discover it automatically. Invoke explicitly with `/<skill-name>`, or let the agent trigger it when a task matches the description.
+Once installed, invoke a skill explicitly by name (e.g. `/clean-code` in Claude Code), or simply describe your task — the agent loads the matching skill automatically based on its `description`.
 
-### Other tools
-The skills are plain Markdown with YAML frontmatter and are portable across any skill-aware agent platform. Point your tool at the `skills/` directory or copy individual skill folders.
+> ⚠️ Skills run with full agent permissions. Review a skill before using it.
 
 ## Contributing
 
