@@ -32,7 +32,7 @@ agent-skills/
 | [code-smells](skills/code-smells/SKILL.md) | Detect, name, and remediate code smells using the classic taxonomy (Bloaters, Object-Orientation Abusers, Change Preventers, Dispensables, Couplers). |
 | [refactoring](skills/refactoring/SKILL.md) | Apply named refactoring techniques (Extract Method, Move Method, Replace Conditional with Polymorphism, …) organized by the classic catalog. |
 | [pragmatic-programmer](skills/pragmatic-programmer/SKILL.md) | Apply *The Pragmatic Programmer*'s foundational principles — DRY and Orthogonality. |
-| [doc-drift](skills/doc-drift/SKILL.md) | Check function comments against the implementation. Report over-promises and direct mismatches on a selection, a file, or a project. On a large codebase, fan the check out to low-cost subagents. |
+| [doc-drift](skills/doc-drift/SKILL.md) | Check function docs against the implementation. Report over-promises and direct mismatches on a selection, a file, or a named folder. A whole-project pass is explicit, and it stays on exported methods. |
 
 ### Design patterns
 [design-pattern](skills/design-pattern/) covers all 22 Gang of Four patterns, organized by category. Each pattern has its own `SKILL.md`, `REFERENCE.md`, and `EXAMPLES.md`.

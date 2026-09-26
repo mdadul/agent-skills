@@ -1,110 +1,152 @@
 ---
 name: doc-drift
 description: >-
-  Detect function-level mismatches between documentation and code. Report over-promises and direct mismatches, and leave under-promises out of the report. Use when the user asks to check docstrings, comments, JSDoc, Javadoc, or other function docs against the implementation — including
-  stale comments, doc drift, wrong @param or @returns, and "does this comment match the code" — on a selection, a file, or a project. On a large codebase, fan the check out to several low-cost subagents.
+  Check function docs against the implementation and report only claims the
+  code misses or contradicts. Use when the user asks whether a docstring,
+  JSDoc, Javadoc, or comment matches the code — stale comments, doc drift,
+  wrong @param or @returns — on a selection, a file, or a named folder.
+  Scan a whole project only when the user explicitly asks. Leave
+  under-promises out of the report.
 ---
 
 # Doc Drift
 
-Check function-level documentation against the implementation. Report incorrectness only: a documented claim the code does not implement, or a claim the code contradicts. Leave out anything that is merely undocumented.
+A cheap, high-precision contract check. Report a documented claim the function never performs, or a claim the code contradicts. Leave out anything that is merely undocumented.
 
-Models treat "the comment is shorter than the code" as a bug. The check gives that observation its own answer, then deletes that answer. Both steps matter. Skipping the undocumented-code question, or telling the checker not to mention it, pushes those notes into the real findings.
-
-Keep the JSON key names. They are the procedure.
+The comment is shorter than the code on purpose. Give that observation its own answer, then delete it. Skipping the undocumented-code question pushes those notes into the real findings.
 
 Do not edit the code or the comments unless the user asks.
 
+A good pass can say: only functions with attached docs were opened, every kept finding was opened in source by you, callees were read before calling something missing, and a stub that already says "hardcoded today" was not reported.
+
 ## What the three answers mean
 
-- **Over-promise.** The documentation promises a behavior the function never performs.
+- **Over-promise.** The documentation promises a specific behavior the function never performs.
 - **Direct mismatch.** The documentation and the code describe the same behavior and disagree about it.
-- **Under-promise.** The function does extra work the comment never mentions, and that extra work still agrees with the comment. A comment is supposed to be shorter than the code.
+- **Under-promise.** The function does extra work the comment never mentions, and that extra work still agrees with the comment.
+
+## What counts as a claim
+
+A claim names a concrete behavior a caller could rely on: a returned value, a count, a stored flag, a formula. "Assign provider" is not a claim.
+
+- Extra metrics, retries, logging, and optional filters are under-promises.
+- If the same block says stub, TEMPORARY, a ticket id, or "hardcoded today," the comment is already admitting the gap. That roadmap is not drift.
+- One sentence is one kind. When it could be either an over-promise or a mismatch, keep the mismatch. Over-promise means the behavior is absent. Mismatch means the code does that thing differently.
 
 ## Scope
 
-Run on whichever the user gives:
+Start small. Widen only when the user asks.
 
-- **Selected code:** documented functions inside the selection.
-- **File:** documented functions in that file.
-- **Project:** documented functions in project source. Skip dependencies, generated files, lockfiles, and vendored trees.
+| Mode | When | What to scan |
+|------|------|----------------|
+| Selection / file | The user has a buffer or a range, or names a file | Documented functions there |
+| Module | "Check ranking," or a folder | That folder, plus in-repo callees of those functions |
+| Repo | The user explicitly says whole project | Exported functions and exported class methods only, then stop |
 
-Use the docstring, JSDoc, Javadoc, or block comment attached to the function, including parameter and return tags in that block. Skip functions with no attached documentation.
+Do not start at all of `src`.
+
+On a repo pass, the doc block must sit immediately above the signature. Private helpers, DTO fields, entity columns, and tests are out unless the user opts in.
+
+Open a file only when a block comment is immediately followed by a function or method. A `/**` on a class, a constant, or an entity is not a function doc. Last time a broader match pulled those into the scan.
+
+Honor paths the user names. Skip `*.spec.ts`, `*.test.ts`, dependencies, generated files, and vendored trees. A modules tree is `src/modules/**` minus `*.spec.ts`.
+
+Skip functions with no attached documentation.
 
 ## Step 1 — Categorize one function at a time
 
-For each documented function, fill one JSON object. Complete the keys in order. Do this before you decide what to show the user.
+Fill one object per documented function, keys in order, before you decide what to show. Short keys, so a weak model can finish them.
 
 ```json
 {
-  "function": "name",
+  "fn": "name",
   "file": "path",
-  "Documentation_Summary": "...",
-  "Code_Summary": "...",
-  "Is_any_core_part_of_the_documentation_not_implemented_in_the_code?": "Yes or No",
-  "If_yes_to_Is_any_core_part_of_the_documentation_not_implemented_in_the_code": [],
-  "Does_the_code_correctly_implement_what_is_mentioned_in_the_documentation?": "Yes or No",
-  "If_no_to_Does_the_code_correctly_implement_what_is_mentioned_in_the_documentation": [],
-  "Is_some_code_not_documented_or_mentioned_in_the_documentation?": "Yes or No",
-  "If_yes_to_Is_some_code_not_documented_or_mentioned_in_the_documentation": []
+  "line": 1,
+  "doc": "one or two sentences",
+  "code": "one or two sentences",
+  "over_promise": "Yes or No",
+  "over_promise_why": [],
+  "implements": "Yes or No",
+  "mismatch_why": [],
+  "under_promise": "Yes or No",
+  "under_promise_why": []
 }
 ```
 
-Summaries are one or two sentences. Check-in values are exactly `Yes` or `No`.
+Questions, in order:
 
-Follow-up arrays use these objects, and only when the check-in says there is something to explain:
+1. `doc` — what the comment claims.
+2. `code` — what the function does.
+3. `over_promise` — is a specific claim absent from this function? `Yes` or `No`.
+4. `implements` — does the code do what the documentation says? `Yes` or `No`.
+5. `under_promise` — is some code undocumented? `Yes` or `No`. Answer this even though it will be deleted.
 
-- Over-promise, only if the check-in is `Yes`: `{"original_documentation_snippet_that_is_not_implemented_in_the_code": "...", "explanation": "..."}`
-- Direct mismatch, only if the check-in is `No`: `{"original_documentation_snippet_that_has_conflicting_information_with_some_code_snippet": "...", "original_code_snippet_that_has_conflicting_information_with_the_identified_documentation_snippet": "...", "explanation": "..."}`
-- Under-promise, only if the check-in is `Yes`: `{"original_code_snippet_that_is_not_documented_or_mentioned_in_the_documentation": "...", "explanation": "..."}`
+Follow-ups only when the check-in says there is something to explain. Otherwise `[]`.
 
-Quote the original documentation and code. An empty array means that category is clean. If a check-in and its follow-up disagree, or the object is not valid JSON, record no finding for that function.
+- `over_promise` is `Yes`: `{"doc": "quoted claim", "why": "what is missing"}`
+- `implements` is `No`: `{"doc": "quoted claim", "code": "quoted lines", "why": "the conflict"}`
+- `under_promise` is `Yes`: `{"code": "quoted lines", "why": "undocumented extra"}`
 
-While you fill the first two check-ins:
+Quote the original text. If a check-in and its array disagree, drop that function. Do not invent a finding from broken JSON.
 
-- Behavior implemented in a callee is implemented. If the body only delegates, read that callee when it is in the repo before calling the claim missing.
-- A plain realization of the words is consistent. Setting a handle to `undefined` can be how the code expires it.
-- A note about when to call the function, or what to call it with, is context. It is a missing feature only when the body contradicts it.
-- Extra behavior the comment omits belongs in the under-promise array, not in the other two.
+Before `over_promise` is `Yes`, open the in-repo callee, one hop. Behavior implemented there is implemented. A callee outside the repo is not evidence the claim is missing.
 
-## Step 2 — Filter after the JSON exists
+A batch returns this envelope, not a bare list:
 
-Delete the under-promise check-in and its follow-up. Do not bring them back into the report.
+```json
+{
+  "files_opened": ["path"],
+  "documented_fn_count": 0,
+  "objects": []
+}
+```
+
+`objects` holds the per-function records. An empty list with no `files_opened` and no `documented_fn_count` means the batch was skipped. That is not a clean result.
+
+## Step 2 — Filter, then open the source
+
+Delete `under_promise` and `under_promise_why`. Do not bring them back.
 
 Keep a finding only when:
 
-- the over-promise check-in is `Yes` and its follow-up is non-empty, or
-- the direct-mismatch check-in is `No` and its follow-up is non-empty.
+- `over_promise` is `Yes` and `over_promise_why` is non-empty, or
+- `implements` is `No` and `mismatch_why` is non-empty.
 
 If both are clean, say nothing about that function.
 
+You report a finding only after you open that file at that line and the quote is there. If you cannot find the quote, drop the finding. This check is yours, including findings a subagent returned.
+
+A skipped batch is redone, by you or in a later wave. Do not call it clean.
+
 ## Who checks it
 
-- A selection, one file, or up to 5 source files: do both steps yourself.
-- A project, or more than 5 source files: do not categorize them yourself when you can fan out. Split the work, then do step 2 on what comes back.
+- A selection or one file: do both steps yourself.
+- One module: do it yourself when it is a handful of documented functions. Otherwise one subagent for that module.
+- Several modules, or an explicit repo pass: fan out by module.
 
-If the host cannot run subagents, still categorize in batches of about 8 files, one function at a time, and filter only after each batch's JSON exists.
+If the host cannot run subagents, do the modules yourself, one module at a time, and filter only after that module's JSON exists.
 
 ## Fan-out
 
-1. List the source files in scope that can contain documented functions.
-2. Split that list into batches of about 8 files.
-3. Launch every batch together so they run at the same time. Use whatever subagent mechanism the host provides.
-4. Run each batch on a low-cost model the host actually lists. Prefer a name containing haiku, then mini, then flash, then luna. Do not invent an id. If none of those are listed, use the host's default.
-5. Paste step 1, including the JSON shape and the filling rules, plus that batch's file paths. The subagent cannot see this skill. Tell it to return the JSON objects and not to filter.
-6. You do step 2. Merge by file, drop duplicates, and present one report. Do not re-check a batch that is clean after filtering.
+Batch by module, not by a fixed file count. Callees live next to the function. Examples of a batch: `dispatchRun`, `ranking`, `outbox`.
+
+1. List modules in scope that contain a block comment immediately above a function or method.
+2. Launch 4 to 6 modules at a time. Wait, merge, then start the next wave.
+3. Use the cheapest model the host actually lists. If you cannot choose, use the host's default. Do not invent a model id.
+4. Paste the three answers, the claim rules, Step 1, and that module's paths. The subagent cannot see this skill. It returns the envelope and does not filter.
+5. You do Step 2, including opening every kept finding in source. Merge by file. Drop duplicates. Do not re-check a module that is clean after you have verified it.
 
 ## Report
 
-Group findings by file. For each finding:
+Write a review, not the JSON. One finding per claim. Group by file.
 
-- **function:** name and location
+- **function:** name and line
 - **kind:** over-promise or direct mismatch
-- **documentation:** the quoted snippet
-- **code:** the quoted snippet when it is a direct mismatch
-- **why:** one or two sentences
+- **documentation:** the quoted claim
+- **code:** the quoted lines, and only for a mismatch
+- **why:** one sentence
 
-If nothing remains after filtering, say the checked functions have no over-promises or direct mismatches. Do not list dropped under-promises.
+If nothing remains, say the checked functions have no over-promises or direct mismatches. Do not list under-promises. Do not list files you did not open.
 
 ## Examples
 
@@ -120,7 +162,7 @@ def set_test_mode(v: bool = True) -> None:
     _TEST_RESULT = []
 ```
 
-The comment says a True is stored for every successful numexpr use. The body only sets the flag and clears the list. Over-promise check-in: `Yes`.
+The comment claims a True is stored for every successful numexpr use. The body only sets the flag and clears the list. `over_promise`: `Yes`.
 
 ### Direct mismatch (keep)
 
@@ -134,7 +176,7 @@ private async getRootCollectionsCount(teamID: string) {
 }
 ```
 
-The comment says highest OrderIndex plus 1. The code returns `orderIndex` unchanged. Direct-mismatch check-in: `No`.
+The comment claims highest OrderIndex plus 1. The code returns `orderIndex` unchanged. `implements`: `No`. That sentence is a mismatch, not also an over-promise.
 
 ### Under-promise (answer, then delete)
 
@@ -146,4 +188,8 @@ float SORTED_FLOATS::operator[](int32_t index) {
 }
 ```
 
-The comment never mentions moving the iterator first. That goes in the under-promise array. Step 2 deletes it. The other two check-ins stay clean.
+The comment never mentions moving the iterator first. That goes in `under_promise_why`. Step 2 deletes it.
+
+### Not drift
+
+A comment that says the provider is hardcoded today, or marks the body TEMPORARY, is telling you the gap on purpose. Do not report it. A comment that only says "assign provider" names no concrete behavior, so it is not a claim.
