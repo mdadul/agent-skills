@@ -2,9 +2,9 @@
 name: doc-drift
 description: >-
   Check function docs against the implementation and report only claims the
-  code misses or contradicts. Use when the user asks whether a docstring,
-  JSDoc, Javadoc, or comment matches the code — stale comments, doc drift,
-  wrong @param or @returns — on a selection, a file, or a named folder.
+  code misses or contradicts. Use when the user asks whether a function
+  comment matches the code — stale comments, doc drift, a wrong parameter
+  or return note — on a selection, a file, or a named folder.
   Scan a whole project only when the user explicitly asks. Leave
   under-promises out of the report.
 ---
@@ -17,7 +17,7 @@ The comment is shorter than the code on purpose. Give that observation its own a
 
 Do not edit the code or the comments unless the user asks.
 
-A good pass can say: only functions with attached docs were opened, every kept finding was opened in source by you, callees were read before calling something missing, and a stub that already says "hardcoded today" was not reported.
+A good pass can say: only functions with attached docs were opened, every kept finding was opened in source by you, callees were read before calling something missing, and a comment that already admits the gap was not reported.
 
 ## What the three answers mean
 
@@ -27,10 +27,10 @@ A good pass can say: only functions with attached docs were opened, every kept f
 
 ## What counts as a claim
 
-A claim names a concrete behavior a caller could rely on: a returned value, a count, a stored flag, a formula. "Assign provider" is not a claim.
+A claim names a concrete behavior a caller could rely on: a returned value, a count, a stored flag, a formula. A vague verb with no concrete behavior is not a claim.
 
 - Extra metrics, retries, logging, and optional filters are under-promises.
-- If the same block says stub, TEMPORARY, a ticket id, or "hardcoded today," the comment is already admitting the gap. That roadmap is not drift.
+- If the same block already says the body is a stub, temporary, or intentionally incomplete, the comment is admitting the gap. That roadmap is not drift.
 - One sentence is one kind. When it could be either an over-promise or a mismatch, keep the mismatch. Over-promise means the behavior is absent. Mismatch means the code does that thing differently.
 
 ## Scope
@@ -40,16 +40,16 @@ Start small. Widen only when the user asks.
 | Mode | When | What to scan |
 |------|------|----------------|
 | Selection / file | The user has a buffer or a range, or names a file | Documented functions there |
-| Module | "Check ranking," or a folder | That folder, plus in-repo callees of those functions |
+| Module | The user names a folder | That folder, plus in-repo callees of those functions |
 | Repo | The user explicitly says whole project | Exported functions and exported class methods only, then stop |
 
-Do not start at all of `src`.
+Do not start by scanning the whole source tree.
 
-On a repo pass, the doc block must sit immediately above the signature. Private helpers, DTO fields, entity columns, and tests are out unless the user opts in.
+On a repo pass, the doc block must sit immediately above the signature. Private helpers, data fields, and tests are out unless the user opts in.
 
-Open a file only when a block comment is immediately followed by a function or method. A `/**` on a class, a constant, or an entity is not a function doc. Last time a broader match pulled those into the scan.
+Open a file only when a doc comment is immediately followed by a function or method. A comment on a type, a constant, or a field is not a function doc.
 
-Honor paths the user names. Skip `*.spec.ts`, `*.test.ts`, dependencies, generated files, and vendored trees. A modules tree is `src/modules/**` minus `*.spec.ts`.
+Honor paths and ignore rules the user names. Skip tests, dependencies, generated files, and vendored trees.
 
 Skip functions with no attached documentation.
 
@@ -128,7 +128,7 @@ If the host cannot run subagents, do the modules yourself, one module at a time,
 
 ## Fan-out
 
-Batch by module, not by a fixed file count. Callees live next to the function. Examples of a batch: `dispatchRun`, `ranking`, `outbox`.
+Batch by module, not by a fixed file count. Callees live next to the function. One batch is one module.
 
 1. List modules in scope that contain a block comment immediately above a function or method.
 2. Launch 4 to 6 modules at a time. Wait, merge, then start the next wave.
@@ -152,44 +152,16 @@ If nothing remains, say the checked functions have no over-promises or direct mi
 
 ### Over-promise (keep)
 
-```python
-def set_test_mode(v: bool = True) -> None:
-    """Keeps track of whether numexpr was used. Stores an additional
-    True for every successful use of evaluate with numexpr since the
-    last get_test_result."""
-    global _TEST_MODE, _TEST_RESULT
-    _TEST_MODE = v
-    _TEST_RESULT = []
-```
-
-The comment claims a True is stored for every successful numexpr use. The body only sets the flag and clears the list. `over_promise`: `Yes`.
+The comment says a success flag is stored for every use. The body only sets a mode flag and clears a list. `over_promise`: `Yes`.
 
 ### Direct mismatch (keep)
 
-```typescript
-/**
- * Returns the count of root collections for a teamID.
- * The count returned is highest OrderIndex + 1.
- */
-private async getRootCollectionsCount(teamID: string) {
-  return rootCollectionCount[0].orderIndex;
-}
-```
-
-The comment claims highest OrderIndex plus 1. The code returns `orderIndex` unchanged. `implements`: `No`. That sentence is a mismatch, not also an over-promise.
+The comment says the result is the highest index plus one. The code returns the index unchanged. `implements`: `No`. That sentence is a mismatch, not also an over-promise.
 
 ### Under-promise (answer, then delete)
 
-```cpp
-/** Return the floating point value of the given index into the list. */
-float SORTED_FLOATS::operator[](int32_t index) {
-  it.move_to_first();
-  return it.data_relative(index)->entry;
-}
-```
-
-The comment never mentions moving the iterator first. That goes in `under_promise_why`. Step 2 deletes it.
+The comment says to return the value at an index. The body also resets a cursor first. That goes in `under_promise_why`. Step 2 deletes it.
 
 ### Not drift
 
-A comment that says the provider is hardcoded today, or marks the body TEMPORARY, is telling you the gap on purpose. Do not report it. A comment that only says "assign provider" names no concrete behavior, so it is not a claim.
+A comment that already says the body is temporary or intentionally incomplete is telling you the gap. Do not report it. A comment that only names a vague action, with no concrete behavior, is not a claim.
