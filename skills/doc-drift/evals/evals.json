@@ -1,0 +1,39 @@
+{
+  "skill_name": "doc-drift",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Can you check whether the comments in skills/doc-prism-workspace/fixtures/mixed-billing.ts actually match the code? I don't want a style review. I only want places where the docs are wrong.",
+      "expected_output": "Report setAuditMode as an over-promise and openInvoiceCount as a direct mismatch. Do not report amountAt.",
+      "files": ["../../doc-prism-workspace/fixtures/mixed-billing.ts"],
+      "assertions": [
+        "The report flags setAuditMode because the comment claims a true is stored for every declined charge and the body only sets a flag and clears the log",
+        "The report flags openInvoiceCount because the comment says highest invoiceSeq plus 1 and the code returns invoiceSeq unchanged",
+        "The report does not flag amountAt or cursor.rewind",
+        "The report does not list undocumented implementation details as findings"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Look at expireSession in skills/doc-prism-workspace/fixtures/session.ts. Does the doc comment disagree with the implementation? Only tell me if something the comment claims is wrong or missing from the code.",
+      "expected_output": "No over-promise and no direct mismatch. Setting client to undefined counts as expiring it. The debug log is an under-promise and must not be reported.",
+      "files": ["../../doc-prism-workspace/fixtures/session.ts"],
+      "assertions": [
+        "The report does not flag expireSession as an over-promise or a direct mismatch",
+        "The report does not treat this.client = undefined as a failure to expire the session",
+        "The report does not present the debug log or endedAt assignment as a problem"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm about to ship skills/doc-prism-workspace/fixtures/names.ts. Check the function comments against the code and tell me if any documented behavior isn't what the code does.",
+      "expected_output": "No findings. displayName title-cases by calling formatTitle, and formatTitle does that.",
+      "files": ["../../doc-prism-workspace/fixtures/names.ts"],
+      "assertions": [
+        "The report does not flag displayName",
+        "The report does not say title case is unimplemented or missing from displayName",
+        "The report says the checked functions have no over-promises or direct mismatches, or otherwise reports no findings"
+      ]
+    }
+  ]
+}
