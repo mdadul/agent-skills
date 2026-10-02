@@ -1,16 +1,14 @@
 # Agent Skills
 
-A collection of reusable **Agent Skills** and **subagents** for AI coding assistants (Claude Code, Claude Agent SDK, and other skill-aware tools).
+A collection of 33 reusable **Agent Skills** for Claude Code, organized into 8 plugins.
 
-Each skill packages domain expertise — coding principles, design patterns, refactoring techniques, framework setup — into a portable, model-discoverable unit. When a task matches a skill's `description`, the agent loads it on demand and follows its guidance.
+Each skill packages domain expertise — coding principles, design patterns, refactoring techniques, testing strategies — into a portable, model-discoverable unit. When a task matches a skill's `description`, the agent loads it on demand and follows its guidance.
 
-## What's inside
+## Repository structure
 
 ```
 agent-skills/
-├── agents/                           # Subagent definitions
-│   └── refactoring-expert.md
-└── plugins/                          # 8 Claude Code plugins
+└── plugins/              # 8 Claude Code plugins
     ├── code-quality/
     ├── design-patterns-behavioral/
     ├── design-patterns-creational/
@@ -35,12 +33,6 @@ Skills are bundled into plugins for easy installation:
 - **testing** — [test-audit](plugins/testing/skills/test-audit/SKILL.md)
 - **documentation** — [doc-drift](plugins/documentation/skills/doc-drift/SKILL.md)
 - **skill-creation** — [create-skills](plugins/skill-creation/skills/create-skills/SKILL.md), [create-subagent](plugins/skill-creation/skills/create-subagent/SKILL.md)
-
-## Subagents
-
-| Agent | What it does |
-|-------|--------------|
-| [refactoring-expert](agents/refactoring-expert.md) | Diagnoses code smells and produces prioritized, step-by-step refactoring plans. Always interviews the user first, then plans against named smells and techniques (powered by the `code-smells` and `refactoring` skills). |
 
 ## Anatomy of a skill
 
@@ -84,17 +76,6 @@ cp -r agent-skills/plugins/code-quality/skills/clean-code ~/.claude/skills/
 ```
 
 Skills are plain Markdown with YAML frontmatter, so you can copy any skill folder to your `~/.claude/skills/` (user-wide) or `.claude/skills/` (project-wide) directory.
-
-### Installing the subagent
-
-The [refactoring-expert](agents/refactoring-expert.md) subagent is available in the agents folder. For Claude Code:
-
-```sh
-git clone https://github.com/mdadul/agent-skills.git
-cp agent-skills/agents/refactoring-expert.md ~/.claude/agents/
-```
-
-Then install the `code-smells` and `refactoring` skills (bundled in the code-quality plugin).
 
 ## Usage
 
