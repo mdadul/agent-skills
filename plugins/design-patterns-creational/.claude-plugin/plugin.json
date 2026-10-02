@@ -1,0 +1,14 @@
+{
+  "name": "design-patterns-creational",
+  "version": "1.0.0",
+  "description": "Gang of Four creational patterns (5 patterns)",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "design patterns creational"
+  ],
+  "displayName": "Design Patterns - Creational"
+}

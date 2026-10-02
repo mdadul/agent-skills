@@ -1,0 +1,23 @@
+{
+  "skill_name": "test-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm about to add a new test for a payment retry handler. The test sets up a mock payment gateway, triggers a retry with a failed first attempt, and asserts that the handler called the retry method. Before I add it, should I? Is there something I should reconsider?",
+      "expected_output": "The skill should apply the 4-question authoring gate: (1) what contract does it protect, (2) what regression fails it, (3) why existing tests don't catch it, (4) does it need test-only seams. It should identify that testing 'retry was called' is likely a private/internal test duplicating the real contract (payment actually succeeds after retry), and suggest testing the observable behavior (payment eventually succeeds) at the real boundary instead.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We have a test file with ~40 tests for a user authentication module. It's gotten slow and brittle. Can you help me audit it for low-value patterns? Here are the patterns I noticed: (1) a test that greps the source for 'const MIN_PASSWORD_LENGTH = 8', (2) three tests that all mock the same JWT library and assert it was called, (3) a test named 'stores user in database' that pre-supplies a test user, asserts it exists, but never actually calls the save() method on the real service. What should I do with each?",
+      "expected_output": "The skill should identify each as a junk pattern: (1) 'exact source grep' fails on refactoring, (2) 'duplicate contract invocations' replayed at multiple boundaries, (3) 'owner-supplied fixture' where test pre-supplies the value instead of letting owner produce it. For each, it should recommend: (1) delete and test the observable behavior (password too short is rejected), (2) keep one test at the real JWT boundary, (3) rewrite to call the real save() and assert the actual store. It should name the retention bar criteria for any kept.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I want to sweep the entire 'notifications' subsystem (3 test files, ~25 tests, a plugin) and prune low-value tests. We're also removing deprecated notification channels. Where do I start, and what's the process?",
+      "expected_output": "The skill should outline the 8-step sweep workflow: (1) baseline (record test counts and pass/fail state at a pinned main SHA), (2) lanes (split by owner boundary—channels, delivery, persistence, QA), (3) read-only ledger (mark each test R/F/C/D with evidence), (4) layer plan (find redundant layers), (5) cutover (apply changes and remove test-only seams), (6) preservation review (have reviewers mutate code to verify keepers catch regressions), (7) product defects (fix any baseline failures at their owner), (8) reconcile (merge main, rerun suite). It should emphasize: do not start step 5 until steps 1-4 are complete.",
+      "files": []
+    }
+  ]
+}

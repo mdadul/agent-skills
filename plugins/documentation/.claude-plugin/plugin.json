@@ -1,0 +1,14 @@
+{
+  "name": "documentation",
+  "version": "1.0.0",
+  "description": "Detect and fix documentation drift, keeping docs in sync with code",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "documentation"
+  ],
+  "displayName": "Documentation"
+}

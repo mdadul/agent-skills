@@ -15,6 +15,7 @@ agent-skills/
     ├── code-smells/
     ├── create-skills/
     ├── create-subagent/
+    ├── dead-code-removal/
     ├── design-pattern/     # The 22 Gang of Four patterns
     ├── doc-drift/
     ├── expo-modules-api/
@@ -32,6 +33,7 @@ agent-skills/
 | [code-smells](skills/code-smells/SKILL.md) | Detect, name, and remediate code smells using the classic taxonomy (Bloaters, Object-Orientation Abusers, Change Preventers, Dispensables, Couplers). |
 | [refactoring](skills/refactoring/SKILL.md) | Apply named refactoring techniques (Extract Method, Move Method, Replace Conditional with Polymorphism, …) organized by the classic catalog. |
 | [pragmatic-programmer](skills/pragmatic-programmer/SKILL.md) | Apply *The Pragmatic Programmer*'s foundational principles — DRY and Orthogonality. |
+| [dead-code-removal](skills/dead-code-removal/SKILL.md) | Find dead code (unused exports, files, dependencies, flags, endpoints, config, DB columns) with tool plus usage verification, and produce a risk-ranked, phased plan for safe removal. Analysis only. |
 | [doc-drift](skills/doc-drift/SKILL.md) | Check function docs against the implementation. Report over-promises and direct mismatches on a selection, a file, or a named folder. A whole-project pass is explicit, and it stays on exported methods. |
 
 ### Design patterns
@@ -135,6 +137,21 @@ cp -r agent-skills/skills/clean-code ~/.claude/skills/
 Once installed, invoke a skill explicitly by name (e.g. `/clean-code` in Claude Code), or simply describe your task — the agent loads the matching skill automatically based on its `description`.
 
 > ⚠️ Skills run with full agent permissions. Review a skill before using it.
+
+## Claude Code Plugins
+
+Skills are also packaged into **8 curated plugins** for easy discovery and installation via the Claude Code plugin marketplace:
+
+- **code-quality** — Clean Code, refactoring, code smells
+- **design-patterns-behavioral** — 10 behavioral patterns
+- **design-patterns-creational** — 5 creational patterns
+- **design-patterns-structural** — 7 structural patterns
+- **react-native** — Expo & NativeWind guidance
+- **testing** — Test audit & coverage analysis
+- **documentation** — Documentation drift detection
+- **skill-creation** — Author skills & subagents
+
+See [PLUGINS.md](./PLUGINS.md) for details. To publish to the marketplace, follow [PUBLISHING.md](./PUBLISHING.md).
 
 ## Contributing
 

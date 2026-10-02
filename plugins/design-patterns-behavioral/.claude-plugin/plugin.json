@@ -1,0 +1,14 @@
+{
+  "name": "design-patterns-behavioral",
+  "version": "1.0.0",
+  "description": "Gang of Four behavioral patterns (10 patterns)",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "design patterns behavioral"
+  ],
+  "displayName": "Design Patterns - Behavioral"
+}

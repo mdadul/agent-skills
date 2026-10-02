@@ -1,0 +1,14 @@
+{
+  "name": "testing",
+  "version": "1.0.0",
+  "description": "Test suite analysis, coverage review, and testing strategy",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "testing"
+  ],
+  "displayName": "Testing"
+}

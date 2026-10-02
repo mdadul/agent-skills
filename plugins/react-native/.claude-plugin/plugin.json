@@ -1,0 +1,14 @@
+{
+  "name": "react-native",
+  "version": "1.0.0",
+  "description": "Guides for Expo Modules API and NativeWind styling",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "react native"
+  ],
+  "displayName": "React Native"
+}

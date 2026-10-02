@@ -1,0 +1,14 @@
+{
+  "name": "design-patterns-structural",
+  "version": "1.0.0",
+  "description": "Gang of Four structural patterns (7 patterns)",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "design patterns structural"
+  ],
+  "displayName": "Design Patterns - Structural"
+}

@@ -1,0 +1,51 @@
+{
+  "skill_name": "dead-code-removal",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Find dead code in this TypeScript service and tell me how to remove it safely. Don't change any files.",
+      "expected_output": "A report with verified candidates, confidence and risk per item, and a phased plan ordered from trivial to externally visible. No files edited.",
+      "files": [],
+      "assertions": [
+        "The agent runs or proposes a detection tool (for example knip) in report-only mode and does not use --fix",
+        "Each candidate lists grep or tool evidence, confidence, and risk",
+        "The plan orders phases from low risk to high risk with a gate and rollback per phase",
+        "No source file is modified"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "knip says the class PaymentHandler is unused. Can I delete it?",
+      "expected_output": "The agent checks for DI registration, string-based lookups, and external consumers before recommending deletion, and does not label it safe on the tool result alone.",
+      "files": [],
+      "assertions": [
+        "The agent checks dynamic-use patterns such as DI containers, decorators, reflection, and queue or route registration",
+        "The agent checks tests, configs, and docs for references",
+        "The answer states confidence and what evidence would raise it"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We have a stale feature flag USE_NEW_INVOICE and an unused invoice_legacy_ref column. Plan their removal.",
+      "expected_output": "Flag and DB column are treated as high risk: flag confirmed one-way in all environments before branch removal; column removed via stop writes, stop reads, observe, backup, then drop in a separate migration.",
+      "files": [],
+      "assertions": [
+        "The plan does not recommend dropping the column in the same PR as removing code that uses it",
+        "The plan requires confirming the flag state in every environment before removing the losing branch",
+        "The plan names the runtime signal and observation window as an assumption or asks the user for it",
+        "The plan includes rollback steps"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Which npm dependencies in this repo are unused? Just remove them.",
+      "expected_output": "The agent detects unused dependencies with a tool, verifies against scripts, config files, and peer or plugin usage, then proposes removal in a dedicated PR with install, build, and test verification.",
+      "files": [],
+      "assertions": [
+        "The agent checks scripts, config files, and plugin or peer usage before marking a dependency unused",
+        "Dependency removal is placed in its own PR with install, build, and test verification",
+        "Edits happen only because the user explicitly asked, and lockfile changes are reviewed"
+      ]
+    }
+  ]
+}

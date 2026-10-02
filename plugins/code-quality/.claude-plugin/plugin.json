@@ -1,0 +1,14 @@
+{
+  "name": "code-quality",
+  "version": "1.0.0",
+  "description": "Apply Clean Code principles, refactoring patterns, and code smell detection",
+  "author": {
+    "name": "Emdadul"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/mdadul/agent-skills",
+  "keywords": [
+    "code quality"
+  ],
+  "displayName": "Code Quality & Refactoring"
+}
