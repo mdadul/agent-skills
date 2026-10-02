@@ -1,57 +1,61 @@
 {
+  "name": "agent-skills",
+  "owner": {
+    "name": "Emdadul Islam"
+  },
   "version": "1.0.0",
   "plugins": [
     {
-      "path": "plugins/code-quality",
+      "source": "./plugins/code-quality",
       "name": "code-quality",
       "displayName": "Code Quality & Refactoring",
       "version": "1.0.0",
       "description": "Apply Clean Code principles, refactoring patterns, and code smell detection"
     },
     {
-      "path": "plugins/design-patterns-behavioral",
+      "source": "./plugins/design-patterns-behavioral",
       "name": "design-patterns-behavioral",
       "displayName": "Design Patterns - Behavioral",
       "version": "1.0.0",
       "description": "Gang of Four behavioral patterns (10 patterns)"
     },
     {
-      "path": "plugins/design-patterns-creational",
+      "source": "./plugins/design-patterns-creational",
       "name": "design-patterns-creational",
       "displayName": "Design Patterns - Creational",
       "version": "1.0.0",
       "description": "Gang of Four creational patterns (5 patterns)"
     },
     {
-      "path": "plugins/design-patterns-structural",
+      "source": "./plugins/design-patterns-structural",
       "name": "design-patterns-structural",
       "displayName": "Design Patterns - Structural",
       "version": "1.0.0",
       "description": "Gang of Four structural patterns (7 patterns)"
     },
     {
-      "path": "plugins/documentation",
+      "source": "./plugins/documentation",
       "name": "documentation",
       "displayName": "Documentation",
       "version": "1.0.0",
       "description": "Detect and fix documentation drift, keeping docs in sync with code"
     },
     {
-      "path": "plugins/react-native",
+      "source": "./plugins/react-native",
       "name": "react-native",
       "displayName": "React Native",
       "version": "1.0.0",
       "description": "Guides for Expo Modules API and NativeWind styling"
     },
     {
-      "path": "plugins/skill-creation",
+      "source": "./plugins/skill-creation",
       "name": "skill-creation",
       "displayName": "Skill Creation",
       "version": "1.0.0",
       "description": "Tools for creating Claude Code skills and subagents"
     },
     {
-      "path": "plugins/testing",
+      "source": "./plugins/testing",
       "name": "testing",
       "displayName": "Testing",
       "version": "1.0.0",
